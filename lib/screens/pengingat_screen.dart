@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../notification_helper.dart';
 
 class PengingatScreen extends StatefulWidget {
@@ -15,7 +16,25 @@ class _PengingatScreenState extends State<PengingatScreen> {
   @override
   void initState() {
     super.initState();
+    _loadPengaturan();
     NotificationHelper.requestPermission();
+  }
+
+  Future<void> _loadPengaturan() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _pengingatAktif = prefs.getBool('pengingat_aktif') ?? false;
+      final jam = prefs.getInt('pengingat_jam') ?? 8;
+      final menit = prefs.getInt('pengingat_menit') ?? 0;
+      _waktuPengingat = TimeOfDay(hour: jam, minute: menit);
+    });
+  }
+
+  Future<void> _simpanPengaturan() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('pengingat_aktif', _pengingatAktif);
+    await prefs.setInt('pengingat_jam', _waktuPengingat.hour);
+    await prefs.setInt('pengingat_menit', _waktuPengingat.minute);
   }
 
   Future<void> _pilihWaktu() async {
@@ -25,6 +44,7 @@ class _PengingatScreenState extends State<PengingatScreen> {
     );
     if (picked != null) {
       setState(() => _waktuPengingat = picked);
+      await _simpanPengaturan();
       if (_pengingatAktif) {
         await NotificationHelper.jadwalkanPengingat(
           id: 1,
@@ -35,7 +55,8 @@ class _PengingatScreenState extends State<PengingatScreen> {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('🔔 Pengingat diatur pukul ${picked.format(context)}'),
+              content: Text(
+                  '🔔 Pengingat diatur pukul ${picked.format(context)}'),
               backgroundColor: const Color(0xFF2EC4A0),
             ),
           );
@@ -46,6 +67,7 @@ class _PengingatScreenState extends State<PengingatScreen> {
 
   Future<void> _togglePengingat(bool value) async {
     setState(() => _pengingatAktif = value);
+    await _simpanPengaturan();
     if (value) {
       await NotificationHelper.jadwalkanPengingat(
         id: 1,
@@ -151,7 +173,8 @@ class _PengingatScreenState extends State<PengingatScreen> {
                           color: const Color(0xFF2EC4A0).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                              color: const Color(0xFF2EC4A0).withOpacity(0.3)),
+                              color:
+                                  const Color(0xFF2EC4A0).withOpacity(0.3)),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
