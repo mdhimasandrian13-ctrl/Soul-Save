@@ -38,8 +38,6 @@ class SavingsListScreen extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Image.asset('assets/monefy_icon.png', height: 80),
-                      const SizedBox(height: 16),
                       Text('Belum ada celengan',
                           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor)),
                       const SizedBox(height: 8),
