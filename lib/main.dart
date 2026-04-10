@@ -10,11 +10,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('id_ID', null);
   await NotificationHelper.init();
-  runApp(const SoulSaveApp());
+  runApp(const MonefyApp());
 }
 
-class SoulSaveApp extends StatelessWidget {
-  const SoulSaveApp({super.key});
+class MonefyApp extends StatelessWidget {
+  const MonefyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,27 +23,26 @@ class SoulSaveApp extends StatelessWidget {
       child: Consumer<SavingsProvider>(
         builder: (context, provider, _) {
           return MaterialApp(
-            title: 'Soul Save',
+            title: 'Monefy',
             debugShowCheckedModeBanner: false,
-            themeMode:
-                provider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+            themeMode: provider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
             theme: ThemeData(
               fontFamily: 'Poppins',
               colorScheme: ColorScheme.fromSeed(
-                seedColor: const Color(0xFF2EC4A0),
-                primary: const Color(0xFF2EC4A0),
+                seedColor: const Color(0xFF0D1B3E),
+                primary: const Color(0xFF0D1B3E),
               ),
-              scaffoldBackgroundColor: const Color(0xFFFDF6ED),
+              scaffoldBackgroundColor: const Color(0xFFF5F5F0),
               useMaterial3: true,
             ),
             darkTheme: ThemeData(
               fontFamily: 'Poppins',
               colorScheme: ColorScheme.fromSeed(
-                seedColor: const Color(0xFF2EC4A0),
-                primary: const Color(0xFF2EC4A0),
+                seedColor: const Color(0xFF0D1B3E),
+                primary: const Color(0xFF0D1B3E),
                 brightness: Brightness.dark,
               ),
-              scaffoldBackgroundColor: const Color(0xFF1A1A2E),
+              scaffoldBackgroundColor: const Color(0xFF0A0F1E),
               useMaterial3: true,
             ),
             home: const HomeScreen(),

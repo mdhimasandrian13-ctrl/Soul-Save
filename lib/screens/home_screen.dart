@@ -7,6 +7,16 @@ import 'savings_list_screen.dart';
 import 'detail_screen.dart';
 import 'tambah_celengan_screen.dart';
 import 'pengingat_screen.dart';
+import 'statistik_screen.dart';
+
+const kNavy = Color(0xFF0D1B3E);
+const kNavyLight = Color(0xFF1A2F5E);
+const kGold = Color(0xFFC9A84C);
+const kGoldLight = Color(0xFFF5E6C0);
+const kBgLight = Color(0xFFF5F5F0);
+const kBgDark = Color(0xFF0A0F1E);
+const kCardDark = Color(0xFF141C30);
+const kCardDark2 = Color(0xFF1C2640);
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -25,29 +35,29 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.watch<SavingsProvider>().isDarkMode;
     return Scaffold(
       body: _screens[_currentIndex],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
-        backgroundColor: isDark ? const Color(0xFF2A2A3E) : Colors.white,
-        indicatorColor: const Color(0xFFD6F5EE),
+        backgroundColor: isDark ? kCardDark : Colors.white,
+        indicatorColor: kGoldLight,
         onDestinationSelected: (i) => setState(() => _currentIndex = i),
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home, color: Color(0xFF2EC4A0)),
+            selectedIcon: Icon(Icons.home, color: kGold),
             label: 'Beranda',
           ),
           NavigationDestination(
             icon: Icon(Icons.savings_outlined),
-            selectedIcon: Icon(Icons.savings, color: Color(0xFF2EC4A0)),
+            selectedIcon: Icon(Icons.savings, color: kGold),
             label: 'Celengan',
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF2EC4A0),
+        backgroundColor: kGold,
         foregroundColor: Colors.white,
         onPressed: () => Navigator.push(context,
             MaterialPageRoute(builder: (_) => const TambahCelenganScreen())),
@@ -62,19 +72,14 @@ class _BerandaTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.watch<SavingsProvider>().isDarkMode;
     final provider = context.watch<SavingsProvider>();
-    final formatter = NumberFormat.currency(
-        locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final formatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
     final now = DateTime.now();
     final hour = now.hour;
-    final greeting = hour < 11
-        ? 'Selamat Pagi'
-        : hour < 15
-            ? 'Selamat Siang'
-            : hour < 18
-                ? 'Selamat Sore'
-                : 'Selamat Malam';
+    final greeting = hour < 11 ? 'Selamat Pagi'
+        : hour < 15 ? 'Selamat Siang'
+        : hour < 18 ? 'Selamat Sore' : 'Selamat Malam';
 
     final motivasiList = [
       '💪 Sedikit demi sedikit, lama-lama menjadi bukit!',
@@ -102,39 +107,50 @@ class _BerandaTab extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('$greeting 👋',
-                        style: TextStyle(
-                            fontSize: 14,
-                            color: isDark
-                                ? Colors.grey[400]
-                                : Colors.grey[600])),
-                    Text('Soul Save',
-                        style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: isDark
-                                ? Colors.white
-                                : const Color(0xFF1A1A2E))),
+                        style: TextStyle(fontSize: 14,
+                            color: isDark ? Colors.grey[400] : Colors.grey[600])),
+                    RichText(
+  text: TextSpan(
+    children: [
+      TextSpan(
+        text: 'Mone',
+        style: TextStyle(
+          fontSize: 26,
+          fontWeight: FontWeight.bold,
+          color: isDark ? Colors.white : kNavy,
+          fontFamily: 'Poppins',
+        ),
+      ),
+      TextSpan(
+        text: 'fy',
+        style: TextStyle(
+          fontSize: 26,
+          fontWeight: FontWeight.bold,
+          color: kGold,
+          fontFamily: 'Poppins',
+        ),
+      ),
+    ],
+  ),
+),
                   ],
                 ),
                 Row(
                   children: [
                     IconButton(
-                      onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => const PengingatScreen())),
-                      icon: const Icon(Icons.notifications_outlined,
-                          color: Color(0xFF2EC4A0)),
+                      onPressed: () => Navigator.push(context,
+                          MaterialPageRoute(builder: (_) => const PengingatScreen())),
+                      icon: const Icon(Icons.notifications_outlined, color: kGold),
                     ),
                     IconButton(
-                      onPressed: () =>
-                          context.read<SavingsProvider>().toggleDarkMode(),
-                      icon: Icon(
-                        isDark ? Icons.light_mode : Icons.dark_mode,
-                        color: const Color(0xFF2EC4A0),
-                      ),
+                      onPressed: () => Navigator.push(context,
+                          MaterialPageRoute(builder: (_) => const StatistikScreen())),
+                      icon: const Icon(Icons.bar_chart_rounded, color: kGold),
                     ),
-                    const Text('🐷', style: TextStyle(fontSize: 36)),
+                    IconButton(
+                      onPressed: () => context.read<SavingsProvider>().toggleDarkMode(),
+                      icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode, color: kGold),
+                    ),
                   ],
                 ),
               ],
@@ -146,27 +162,19 @@ class _BerandaTab extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isDark
-                    ? const Color(0xFF1FA085).withOpacity(0.2)
-                    : const Color(0xFFE8FAF5),
+                color: isDark ? kNavy.withOpacity(0.4) : kGoldLight,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                    color: const Color(0xFF2EC4A0).withOpacity(0.3)),
+                border: Border.all(color: kGold.withOpacity(0.3)),
               ),
               child: Row(
                 children: [
                   const Text('✨', style: TextStyle(fontSize: 20)),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: Text(
-                      motivasi,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: isDark
-                            ? const Color(0xFF5EDFC4)
-                            : const Color(0xFF1FA085),
-                        fontWeight: FontWeight.w500,
-                      ),
+                    child: Text(motivasi,
+                      style: TextStyle(fontSize: 13,
+                          color: isDark ? kGold : kNavy,
+                          fontWeight: FontWeight.w500),
                     ),
                   ),
                 ],
@@ -180,14 +188,14 @@ class _BerandaTab extends StatelessWidget {
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF2EC4A0), Color(0xFF1FA085)],
+                  colors: [kNavy, kNavyLight],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF2EC4A0).withOpacity(0.35),
+                    color: kNavy.withOpacity(0.35),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
@@ -197,18 +205,14 @@ class _BerandaTab extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('Total Tabunganmu',
-                      style: TextStyle(
-                          color: Colors.white70, fontSize: 14)),
+                      style: TextStyle(color: Colors.white60, fontSize: 14)),
                   const SizedBox(height: 8),
                   Text(formatter.format(provider.totalSaldo),
                       style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold)),
+                          color: kGold, fontSize: 28, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
                   Text('${provider.celenganList.length} celengan aktif',
-                      style: const TextStyle(
-                          color: Colors.white70, fontSize: 13)),
+                      style: const TextStyle(color: Colors.white60, fontSize: 13)),
                 ],
               ),
             ),
@@ -220,38 +224,22 @@ class _BerandaTab extends StatelessWidget {
                 child: Column(
                   children: [
                     const SizedBox(height: 40),
-                    const Text('🐷', style: TextStyle(fontSize: 64)),
-                    const SizedBox(height: 16),
                     Text('Belum ada celengan',
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: isDark
-                                ? Colors.white
-                                : const Color(0xFF1A1A2E))),
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : kNavy)),
                     const SizedBox(height: 8),
-                    Text(
-                        'Tap tombol + untuk membuat celengan pertamamu!',
-                        style: TextStyle(
-                            color: isDark
-                                ? Colors.grey[400]
-                                : Colors.grey[600]),
+                    Text('Tap tombol + untuk membuat celengan pertamamu!',
+                        style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600]),
                         textAlign: TextAlign.center),
                   ],
                 ),
               )
             else ...[
               Text('Celenganku',
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: isDark
-                          ? Colors.white
-                          : const Color(0xFF1A1A2E))),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : kNavy)),
               const SizedBox(height: 16),
-              ...provider.celenganList
-                  .map((c) => _CelenganCard(celengan: c))
-                  .toList(),
+              ...provider.celenganList.map((c) => _CelenganCard(celengan: c)).toList(),
             ],
           ],
         ),
@@ -266,23 +254,21 @@ class _CelenganCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final formatter = NumberFormat.currency(
-        locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final isDark = context.watch<SavingsProvider>().isDarkMode;
+    final formatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
     final colors = [
-      const Color(0xFF2EC4A0),
-      const Color(0xFFFF8C42),
-      const Color(0xFFF4C542),
-      const Color(0xFF6C63FF),
-      const Color(0xFFFF6B6B),
+      kGold,
+      const Color(0xFF2E5FA3),
+      const Color(0xFF8B6914),
+      const Color(0xFF1A4A8A),
+      const Color(0xFFB8860B),
     ];
     final color = colors[celengan.id! % colors.length];
 
     String? countdownText;
     if (celengan.targetTanggal != null && !celengan.sudahTercapai) {
-      final selisih =
-          celengan.targetTanggal!.difference(DateTime.now()).inDays;
+      final selisih = celengan.targetTanggal!.difference(DateTime.now()).inDays;
       if (selisih > 0) {
         countdownText = '📅 $selisih hari lagi';
       } else if (selisih == 0) {
@@ -293,15 +279,13 @@ class _CelenganCard extends StatelessWidget {
     }
 
     return GestureDetector(
-      onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (_) => DetailScreen(celengan: celengan))),
+      onTap: () => Navigator.push(context,
+          MaterialPageRoute(builder: (_) => DetailScreen(celengan: celengan))),
       child: Container(
         margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF2A2A3E) : Colors.white,
+          color: isDark ? kCardDark : Colors.white,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
@@ -315,48 +299,31 @@ class _CelenganCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text(celengan.emoji,
-                    style: const TextStyle(fontSize: 28)),
+                Text(celengan.emoji, style: const TextStyle(fontSize: 28)),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(celengan.nama,
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                              color: isDark
-                                  ? Colors.white
-                                  : const Color(0xFF1A1A2E))),
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15,
+                              color: isDark ? Colors.white : kNavy)),
                       Text(formatter.format(celengan.saldo),
-                          style: TextStyle(
-                              color: color,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14)),
+                          style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 14)),
                     ],
                   ),
                 ),
                 if (celengan.sudahTercapai)
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                        color: const Color(0xFFD6F5EE),
-                        borderRadius: BorderRadius.circular(20)),
+                        color: kGoldLight, borderRadius: BorderRadius.circular(20)),
                     child: const Text('🎉 Tercapai!',
-                        style: TextStyle(
-                            fontSize: 11,
-                            color: Color(0xFF1FA085),
-                            fontWeight: FontWeight.bold)),
+                        style: TextStyle(fontSize: 11, color: kNavy, fontWeight: FontWeight.bold)),
                   )
                 else
-                  Text(
-                      '${(celengan.persentase * 100).toStringAsFixed(0)}%',
-                      style: TextStyle(
-                          color: color,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14)),
+                  Text('${(celengan.persentase * 100).toStringAsFixed(0)}%',
+                      style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 14)),
               ],
             ),
             if (celengan.target > 0) ...[
@@ -375,18 +342,12 @@ class _CelenganCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text('Target: ${formatter.format(celengan.target)}',
-                      style: TextStyle(
-                          fontSize: 12,
-                          color: isDark
-                              ? Colors.grey[400]
-                              : Colors.grey[500])),
+                      style: TextStyle(fontSize: 12,
+                          color: isDark ? Colors.grey[400] : Colors.grey[500])),
                   if (countdownText != null)
                     Text(countdownText,
-                        style: TextStyle(
-                            fontSize: 11,
-                            color: isDark
-                                ? Colors.grey[400]
-                                : Colors.grey[500],
+                        style: TextStyle(fontSize: 11,
+                            color: isDark ? Colors.grey[400] : Colors.grey[500],
                             fontWeight: FontWeight.w500)),
                 ],
               ),

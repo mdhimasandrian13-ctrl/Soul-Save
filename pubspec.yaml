@@ -17,6 +17,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   confetti: ^0.7.0
   awesome_notifications: 0.11.0
+  fl_chart: ^0.68.0
 
 dev_dependencies:
   flutter_test:
@@ -27,11 +28,11 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/icon.png
+    - assets/monefy_icon.png
 
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/icon.png"
-  adaptive_icon_background: "#2EC4A0"
-  adaptive_icon_foreground: "assets/icon.png"
+  image_path: "assets/monefy_icon.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/monefy_icon.png"

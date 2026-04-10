@@ -6,6 +6,7 @@ import '../models/celengan_model.dart';
 import '../models/transaksi_model.dart';
 import '../providers/savings_provider.dart';
 import 'tambah_celengan_screen.dart';
+import 'home_screen.dart';
 
 class DetailScreen extends StatefulWidget {
   final Celengan celengan;
@@ -21,8 +22,7 @@ class _DetailScreenState extends State<DetailScreen> {
   @override
   void initState() {
     super.initState();
-    _confettiController =
-        ConfettiController(duration: const Duration(seconds: 3));
+    _confettiController = ConfettiController(duration: const Duration(seconds: 3));
     Future.microtask(() {
       context.read<SavingsProvider>().loadTransaksi(widget.celengan.id!);
     });
@@ -34,41 +34,44 @@ class _DetailScreenState extends State<DetailScreen> {
     super.dispose();
   }
 
-  void _showTransaksiSheet(TipeTransaksi tipe) {
+  void _showTransaksiSheet(TipeTransaksi tipe, bool isDark) {
     final nominalCtrl = TextEditingController();
     final catatanCtrl = TextEditingController();
+    final cardColor = isDark ? kCardDark2 : const Color(0xFFF5F5F0);
+    final textColor = isDark ? Colors.white : kNavy;
+    final subTextColor = isDark ? Colors.white60 : Colors.grey[600]!;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: isDark ? kCardDark : Colors.white,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(
             bottom: MediaQuery.of(ctx).viewInsets.bottom,
-            left: 20,
-            right: 20,
-            top: 24),
+            left: 20, right: 20, top: 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-                tipe == TipeTransaksi.setor
-                    ? '💰 Tambah Setoran'
-                    : '💸 Tarik Dana',
-                style: const TextStyle(
-                    fontSize: 18, fontWeight: FontWeight.bold)),
+              tipe == TipeTransaksi.setor ? '💰 Tambah Setoran' : '💸 Tarik Dana',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor),
+            ),
             const SizedBox(height: 20),
             TextField(
               controller: nominalCtrl,
               keyboardType: TextInputType.number,
               autofocus: true,
+              style: TextStyle(color: textColor),
               decoration: InputDecoration(
                 labelText: 'Nominal',
+                labelStyle: TextStyle(color: subTextColor),
                 prefixText: 'Rp ',
+                prefixStyle: TextStyle(color: textColor),
                 filled: true,
-                fillColor: const Color(0xFFFDF6ED),
+                fillColor: cardColor,
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none),
@@ -77,10 +80,12 @@ class _DetailScreenState extends State<DetailScreen> {
             const SizedBox(height: 14),
             TextField(
               controller: catatanCtrl,
+              style: TextStyle(color: textColor),
               decoration: InputDecoration(
                 labelText: 'Catatan (opsional)',
+                labelStyle: TextStyle(color: subTextColor),
                 filled: true,
-                fillColor: const Color(0xFFFDF6ED),
+                fillColor: cardColor,
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none),
@@ -92,44 +97,38 @@ class _DetailScreenState extends State<DetailScreen> {
               height: 50,
               child: ElevatedButton(
                 onPressed: () async {
-                  final nominal = double.tryParse(
-                      nominalCtrl.text.replaceAll('.', ''));
+                  final nominal = double.tryParse(nominalCtrl.text.replaceAll('.', ''));
                   if (nominal == null || nominal <= 0) return;
 
-                  final celengan = context
-                      .read<SavingsProvider>()
-                      .celenganList
-                      .firstWhere((c) => c.id == widget.celengan.id);
+                  final celengan = context.read<SavingsProvider>()
+                      .celenganList.firstWhere((c) => c.id == widget.celengan.id);
 
                   await context.read<SavingsProvider>().tambahTransaksi(
-                        celengan: celengan,
-                        tipe: tipe,
-                        nominal: nominal,
-                        catatan: catatanCtrl.text.trim().isEmpty
-                            ? null
-                            : catatanCtrl.text.trim(),
-                      );
+                    celengan: celengan,
+                    tipe: tipe,
+                    nominal: nominal,
+                    catatan: catatanCtrl.text.trim().isEmpty ? null : catatanCtrl.text.trim(),
+                  );
 
                   Navigator.pop(ctx);
 
-                  // Cek apakah target tercapai setelah setor
-                  final updated = context
-                      .read<SavingsProvider>()
-                      .celenganList
-                      .firstWhere((c) => c.id == widget.celengan.id);
+                  final updated = context.read<SavingsProvider>()
+                      .celenganList.firstWhere((c) => c.id == widget.celengan.id);
                   if (updated.sudahTercapai && tipe == TipeTransaksi.setor) {
                     _confettiController.play();
                     if (context.mounted) {
                       showDialog(
                         context: context,
                         builder: (_) => AlertDialog(
-                          title: const Text('🎉 Selamat!'),
+                          backgroundColor: isDark ? kCardDark : Colors.white,
+                          title: Text('🎉 Selamat!', style: TextStyle(color: textColor)),
                           content: Text(
-                              'Target celengan "${updated.nama}" sudah tercapai! Kamu luar biasa!'),
+                              'Target celengan "${updated.nama}" sudah tercapai! Kamu luar biasa!',
+                              style: TextStyle(color: subTextColor)),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context),
-                              child: const Text('Terima Kasih! 😊'),
+                              child: const Text('Terima Kasih! 😊', style: TextStyle(color: kGold)),
                             ),
                           ],
                         ),
@@ -138,17 +137,13 @@ class _DetailScreenState extends State<DetailScreen> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: tipe == TipeTransaksi.setor
-                      ? const Color(0xFF2EC4A0)
-                      : const Color(0xFFFF6B6B),
+                  backgroundColor: tipe == TipeTransaksi.setor ? kGold : const Color(0xFFFF6B6B),
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   elevation: 0,
                 ),
                 child: const Text('Simpan',
-                    style: TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.bold)),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             ),
             const SizedBox(height: 20),
@@ -161,16 +156,20 @@ class _DetailScreenState extends State<DetailScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<SavingsProvider>();
+    final isDark = provider.isDarkMode;
     final celengan = provider.celenganList.firstWhere(
-        (c) => c.id == widget.celengan.id,
-        orElse: () => widget.celengan);
+        (c) => c.id == widget.celengan.id, orElse: () => widget.celengan);
     final transaksiList = provider.getTransaksi(celengan.id!);
-    final formatter = NumberFormat.currency(
-        locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final formatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
     final dateFormatter = DateFormat('dd MMM yyyy, HH:mm', 'id_ID');
 
+    final bgColor = isDark ? kBgDark : const Color(0xFFF5F5F0);
+    final cardColor = isDark ? kCardDark : Colors.white;
+    final textColor = isDark ? Colors.white : kNavy;
+    final subTextColor = isDark ? Colors.white60 : Colors.grey[500]!;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFDF6ED),
+      backgroundColor: bgColor,
       body: Stack(
         children: [
           CustomScrollView(
@@ -178,41 +177,37 @@ class _DetailScreenState extends State<DetailScreen> {
               SliverAppBar(
                 expandedHeight: 200,
                 pinned: true,
-                backgroundColor: const Color(0xFF2EC4A0),
+                backgroundColor: kNavy,
                 leading: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios,
-                        color: Colors.white),
+                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
                     onPressed: () => Navigator.pop(context)),
                 actions: [
                   IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.white),
-                    onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) =>
-                                TambahCelenganScreen(celengan: celengan))),
+                    icon: const Icon(Icons.edit, color: kGold),
+                    onPressed: () => Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => TambahCelenganScreen(celengan: celengan))),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.delete_outline,
-                        color: Colors.white),
+                    icon: const Icon(Icons.delete_outline, color: Colors.white),
                     onPressed: () => showDialog(
                       context: context,
                       builder: (_) => AlertDialog(
-                        title: const Text('Hapus Celengan?'),
+                        backgroundColor: cardColor,
+                        title: Text('Hapus Celengan?', style: TextStyle(color: textColor)),
                         content: Text(
-                            'Celengan "${celengan.nama}" dan semua riwayatnya akan dihapus permanen.'),
+                            'Celengan "${celengan.nama}" dan semua riwayatnya akan dihapus permanen.',
+                            style: TextStyle(color: subTextColor)),
                         actions: [
                           TextButton(
                               onPressed: () => Navigator.pop(context),
-                              child: const Text('Batal')),
+                              child: const Text('Batal', style: TextStyle(color: kNavy))),
                           TextButton(
                             onPressed: () {
                               provider.hapusCelengan(celengan.id!);
                               Navigator.pop(context);
                               Navigator.pop(context);
                             },
-                            child: const Text('Hapus',
-                                style: TextStyle(color: Colors.red)),
+                            child: const Text('Hapus', style: TextStyle(color: Colors.red)),
                           ),
                         ],
                       ),
@@ -223,36 +218,29 @@ class _DetailScreenState extends State<DetailScreen> {
                   background: Container(
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [Color(0xFF2EC4A0), Color(0xFF1FA085)],
+                        colors: [kNavy, kNavyLight],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                     ),
                     child: SafeArea(
                       child: Padding(
-                        padding:
-                            const EdgeInsets.fromLTRB(20, 60, 20, 20),
+                        padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             Text('${celengan.emoji} ${celengan.nama}',
                                 style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold)),
+                                    color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
                             const SizedBox(height: 4),
                             Text(formatter.format(celengan.saldo),
-                                style: const TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 16)),
+                                style: const TextStyle(color: kGold, fontSize: 16, fontWeight: FontWeight.w600)),
                             if (celengan.targetTanggal != null) ...[
                               const SizedBox(height: 4),
                               Text(
                                 '📅 ${celengan.targetTanggal!.difference(DateTime.now()).inDays} hari lagi',
-                                style: const TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 13),
+                                style: const TextStyle(color: Colors.white60, fontSize: 13),
                               ),
                             ],
                           ],
@@ -272,24 +260,17 @@ class _DetailScreenState extends State<DetailScreen> {
                         Container(
                           padding: const EdgeInsets.all(18),
                           decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(18),
-                          ),
+                              color: cardColor, borderRadius: BorderRadius.circular(18)),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Text('Progress',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold)),
-                                  Text(
-                                      '${(celengan.persentase * 100).toStringAsFixed(1)}%',
-                                      style: const TextStyle(
-                                          color: Color(0xFF2EC4A0),
-                                          fontWeight: FontWeight.bold)),
+                                  Text('Progress',
+                                      style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
+                                  Text('${(celengan.persentase * 100).toStringAsFixed(1)}%',
+                                      style: const TextStyle(color: kGold, fontWeight: FontWeight.bold)),
                                 ],
                               ),
                               const SizedBox(height: 10),
@@ -297,20 +278,15 @@ class _DetailScreenState extends State<DetailScreen> {
                                 borderRadius: BorderRadius.circular(6),
                                 child: LinearProgressIndicator(
                                   value: celengan.persentase,
-                                  backgroundColor: const Color(0xFF2EC4A0)
-                                      .withOpacity(0.15),
-                                  valueColor:
-                                      const AlwaysStoppedAnimation(
-                                          Color(0xFF2EC4A0)),
+                                  backgroundColor: kGold.withOpacity(0.15),
+                                  valueColor: const AlwaysStoppedAnimation(kGold),
                                   minHeight: 10,
                                 ),
                               ),
                               const SizedBox(height: 8),
                               Text(
                                   '${formatter.format(celengan.saldo)} dari ${formatter.format(celengan.target)}',
-                                  style: TextStyle(
-                                      color: Colors.grey[500],
-                                      fontSize: 13)),
+                                  style: TextStyle(color: subTextColor, fontSize: 13)),
                             ],
                           ),
                         ),
@@ -320,165 +296,116 @@ class _DetailScreenState extends State<DetailScreen> {
                         children: [
                           Expanded(
                             child: ElevatedButton.icon(
-                              onPressed: () => _showTransaksiSheet(
-                                  TipeTransaksi.setor),
+                              onPressed: () => _showTransaksiSheet(TipeTransaksi.setor, isDark),
                               icon: const Icon(Icons.add),
                               label: const Text('Setor'),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    const Color(0xFF2EC4A0),
+                                backgroundColor: kGold,
                                 foregroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                        BorderRadius.circular(14)),
+                                    borderRadius: BorderRadius.circular(14)),
                                 elevation: 0,
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 14),
+                                padding: const EdgeInsets.symmetric(vertical: 14),
                               ),
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: ElevatedButton.icon(
-                              onPressed: () => _showTransaksiSheet(
-                                  TipeTransaksi.tarik),
+                              onPressed: () => _showTransaksiSheet(TipeTransaksi.tarik, isDark),
                               icon: const Icon(Icons.remove),
                               label: const Text('Tarik'),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    const Color(0xFFFF6B6B),
+                                backgroundColor: kNavy,
                                 foregroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                        BorderRadius.circular(14)),
+                                    borderRadius: BorderRadius.circular(14)),
                                 elevation: 0,
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 14),
+                                padding: const EdgeInsets.symmetric(vertical: 14),
                               ),
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 24),
-                      const Text('Riwayat Transaksi',
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold)),
+                      Text('Riwayat Transaksi',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textColor)),
                       const SizedBox(height: 12),
                       if (transaksiList.isEmpty)
                         Center(
                           child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(vertical: 32),
+                            padding: const EdgeInsets.symmetric(vertical: 32),
                             child: Column(
                               children: [
-                                const Text('📋',
-                                    style: TextStyle(fontSize: 40)),
+                                const Text('📋', style: TextStyle(fontSize: 40)),
                                 const SizedBox(height: 8),
-                                Text('Belum ada transaksi',
-                                    style: TextStyle(
-                                        color: Colors.grey[500])),
+                                Text('Belum ada transaksi', style: TextStyle(color: subTextColor)),
                               ],
                             ),
                           ),
                         )
                       else
                         ...transaksiList.map((t) => Container(
-                              margin:
-                                  const EdgeInsets.only(bottom: 10),
-                              padding: const EdgeInsets.all(14),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius:
-                                    BorderRadius.circular(14),
+                          margin: const EdgeInsets.only(bottom: 10),
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                              color: cardColor, borderRadius: BorderRadius.circular(14)),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 40, height: 40,
+                                decoration: BoxDecoration(
+                                  color: t.tipe == TipeTransaksi.setor
+                                      ? kGold.withOpacity(0.15)
+                                      : kNavy.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  t.tipe == TipeTransaksi.setor
+                                      ? Icons.arrow_downward
+                                      : Icons.arrow_upward,
+                                  color: t.tipe == TipeTransaksi.setor ? kGold : kNavy,
+                                  size: 20,
+                                ),
                               ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      color: t.tipe ==
-                                              TipeTransaksi.setor
-                                          ? const Color(0xFFD6F5EE)
-                                          : const Color(0xFFFFEBEB),
-                                      borderRadius:
-                                          BorderRadius.circular(12),
-                                    ),
-                                    child: Icon(
-                                      t.tipe == TipeTransaksi.setor
-                                          ? Icons.arrow_downward
-                                          : Icons.arrow_upward,
-                                      color: t.tipe ==
-                                              TipeTransaksi.setor
-                                          ? const Color(0xFF2EC4A0)
-                                          : const Color(0xFFFF6B6B),
-                                      size: 20,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                            t.tipe ==
-                                                    TipeTransaksi.setor
-                                                ? 'Setoran'
-                                                : 'Penarikan',
-                                            style: const TextStyle(
-                                                fontWeight:
-                                                    FontWeight.w600)),
-                                        if (t.catatan != null)
-                                          Text(t.catatan!,
-                                              style: TextStyle(
-                                                  color:
-                                                      Colors.grey[500],
-                                                  fontSize: 12)),
-                                        Text(
-                                            dateFormatter
-                                                .format(t.tanggal),
-                                            style: TextStyle(
-                                                color: Colors.grey[400],
-                                                fontSize: 11)),
-                                      ],
-                                    ),
-                                  ),
-                                  Text(
-                                    '${t.tipe == TipeTransaksi.setor ? '+' : '-'}${formatter.format(t.nominal)}',
-                                    style: TextStyle(
-                                        color: t.tipe ==
-                                                TipeTransaksi.setor
-                                            ? const Color(0xFF2EC4A0)
-                                            : const Color(0xFFFF6B6B),
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14),
-                                  ),
-                                ],
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                        t.tipe == TipeTransaksi.setor ? 'Setoran' : 'Penarikan',
+                                        style: TextStyle(fontWeight: FontWeight.w600, color: textColor)),
+                                    if (t.catatan != null)
+                                      Text(t.catatan!,
+                                          style: TextStyle(color: subTextColor, fontSize: 12)),
+                                    Text(dateFormatter.format(t.tanggal),
+                                        style: TextStyle(color: subTextColor, fontSize: 11)),
+                                  ],
+                                ),
                               ),
-                            )),
+                              Text(
+                                '${t.tipe == TipeTransaksi.setor ? '+' : '-'}${formatter.format(t.nominal)}',
+                                style: TextStyle(
+                                    color: t.tipe == TipeTransaksi.setor ? kGold : const Color(0xFFFF6B6B),
+                                    fontWeight: FontWeight.bold, fontSize: 14),
+                              ),
+                            ],
+                          ),
+                        )),
                     ],
                   ),
                 ),
               ),
             ],
           ),
-
-          // Confetti widget
           Align(
             alignment: Alignment.topCenter,
             child: ConfettiWidget(
               confettiController: _confettiController,
               blastDirectionality: BlastDirectionality.explosive,
               shouldLoop: false,
-              colors: const [
-                Color(0xFF2EC4A0),
-                Color(0xFFFF8C42),
-                Color(0xFFF4C542),
-                Color(0xFF6C63FF),
-                Color(0xFFFF6B6B),
-              ],
+              colors: const [kGold, kNavy, Color(0xFFC9A84C), Color(0xFF1A2F5E), Colors.white],
             ),
           ),
         ],
