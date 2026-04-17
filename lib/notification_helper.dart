@@ -7,9 +7,9 @@ class NotificationHelper {
       null,
       [
         NotificationChannel(
-          channelKey: 'soul_save_channel',
+          channelKey: 'Monefy_channel',
           channelName: 'Pengingat Menabung',
-          channelDescription: 'Notifikasi pengingat menabung Soul Save',
+          channelDescription: 'Notifikasi pengingat menabung Monefy',
           defaultColor: const Color(0xFF2EC4A0),
           ledColor: const Color(0xFF2EC4A0),
           importance: NotificationImportance.High,
@@ -32,8 +32,8 @@ class NotificationHelper {
     await AwesomeNotifications().createNotification(
       content: NotificationContent(
         id: id,
-        channelKey: 'soul_save_channel',
-        title: '🐷 Waktunya Menabung!',
+        channelKey: 'Monefy_channel',
+        title: ' Waktunya Menabung!',
         body: 'Jangan lupa setor ke celengan "$namaCelengan" hari ini!',
         notificationLayout: NotificationLayout.Default,
       ),

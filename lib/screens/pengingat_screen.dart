@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../notification_helper.dart';
 
+const kNavy = Color(0xFF0D1B3E);
+const kNavyLight = Color(0xFF1A2F5E);
+const kGold = Color(0xFFC9A84C);
+const kGoldLight = Color(0xFFF5E6C0);
+
 class PengingatScreen extends StatefulWidget {
   const PengingatScreen({super.key});
 
@@ -56,8 +61,11 @@ class _PengingatScreenState extends State<PengingatScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                  '🔔 Pengingat diatur pukul ${picked.format(context)}'),
-              backgroundColor: const Color(0xFF2EC4A0),
+                '🔔 Pengingat diatur pukul ${picked.format(context)}',
+                style: const TextStyle(
+                    color: kNavy, fontWeight: FontWeight.bold),
+              ),
+              backgroundColor: kGold,
             ),
           );
         }
@@ -78,8 +86,11 @@ class _PengingatScreenState extends State<PengingatScreen> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('🔔 Pengingat menabung diaktifkan!'),
-            backgroundColor: Color(0xFF2EC4A0),
+            content: Text(
+              '🔔 Pengingat menabung diaktifkan!',
+              style: TextStyle(color: kNavy, fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: kGold,
           ),
         );
       }
@@ -88,8 +99,11 @@ class _PengingatScreenState extends State<PengingatScreen> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('🔕 Pengingat menabung dimatikan'),
-            backgroundColor: Colors.grey,
+            content: Text(
+              '🔕 Pengingat menabung dimatikan',
+              style: TextStyle(color: kNavy, fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: kGold,
           ),
         );
       }
@@ -159,7 +173,7 @@ class _PengingatScreenState extends State<PengingatScreen> {
                       Switch(
                         value: _pengingatAktif,
                         onChanged: _togglePengingat,
-                        activeColor: const Color(0xFF2EC4A0),
+                        activeColor: isDark ? kGold : kNavy,
                       ),
                     ],
                   ),
@@ -170,11 +184,14 @@ class _PengingatScreenState extends State<PengingatScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF2EC4A0).withOpacity(0.1),
+                          color: isDark
+                              ? kGold.withOpacity(0.1)
+                              : kNavy.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                              color:
-                                  const Color(0xFF2EC4A0).withOpacity(0.3)),
+                              color: isDark
+                                  ? kGold.withOpacity(0.3)
+                                  : kNavy.withOpacity(0.3)),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -189,14 +206,14 @@ class _PengingatScreenState extends State<PengingatScreen> {
                               children: [
                                 Text(
                                   _waktuPengingat.format(context),
-                                  style: const TextStyle(
-                                      color: Color(0xFF2EC4A0),
+                                  style: TextStyle(
+                                      color: isDark ? kGold : kNavy,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16),
                                 ),
                                 const SizedBox(width: 8),
-                                const Icon(Icons.access_time,
-                                    color: Color(0xFF2EC4A0), size: 20),
+                                Icon(Icons.access_time,
+                                    color: isDark ? kGold : kNavy, size: 20),
                               ],
                             ),
                           ],
@@ -211,10 +228,14 @@ class _PengingatScreenState extends State<PengingatScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF2EC4A0).withOpacity(0.1),
+                color: isDark
+                    ? kGold.withOpacity(0.1)
+                    : kNavy.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                    color: const Color(0xFF2EC4A0).withOpacity(0.3)),
+                    color: isDark
+                        ? kGold.withOpacity(0.3)
+                        : kNavy.withOpacity(0.3)),
               ),
               child: Row(
                 children: [
@@ -225,9 +246,7 @@ class _PengingatScreenState extends State<PengingatScreen> {
                       'Pengingat akan muncul setiap hari pada waktu yang kamu pilih!',
                       style: TextStyle(
                           fontSize: 12,
-                          color: isDark
-                              ? const Color(0xFF5EDFC4)
-                              : const Color(0xFF1FA085)),
+                          color: isDark ? kGold : kNavy),
                     ),
                   ),
                 ],
